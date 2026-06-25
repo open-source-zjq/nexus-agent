@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typecheck:
+    name: Typecheck (backend + frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  tool-smoke:
+    name: Built-in tool smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run tool smoke (built-in tools + sandbox out-of-bounds rejection)
+        run: npx tsx backend/scripts/tool-smoke.ts
+        working-directory: .
+
+  brand-gate:
+    name: Brand cleanliness gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The denylist is kept OUT of the repo (so the reproduced product's own
+      # brand / codename / logo-mark strings are never published here). It is
+      # injected from a repo secret, one term per line. The gate scans file
+      # CONTENT, file NAMES and asset identifiers; it never inlines a brand
+      # string itself, and the denylist file is excluded from the scan.
+      - name: Materialize brand denylist from secret
+        env:
+          BRAND_DENYLIST: ${{ secrets.BRAND_DENYLIST }}
+        run: |
+          if [ -z "${BRAND_DENYLIST}" ]; then
+            echo "::warning::BRAND_DENYLIST secret is not set — skipping the brand gate."
+            echo "skip=1" >> "$GITHUB_ENV"
+          else
+            printf '%s\n' "${BRAND_DENYLIST}" > .brand-denylist
+          fi
+      - name: Scan content + filenames against the denylist
+        if: env.skip != '1'
+        run: |
+          set -euo pipefail
+          # 1) Text content (incl. SVG/CSS identifiers + Tauri/Rust: bundle id,
+          #    deep-link scheme, IPC command names)
+          if git ls-files '*.ts' '*.tsx' '*.js' '*.mjs' '*.json' '*.md' '*.css' '*.html' '*.svg' '*.rs' '*.toml' \
+              | xargs grep -rinEf .brand-denylist 2>/dev/null; then
+            echo "::error::Brand denylist term found in file content (see matches above)."
+            exit 1
+          fi
+          # 2) File names / paths (icons, style files, component names, …)
+          if git ls-files | grep -inEf .brand-denylist; then
+            echo "::error::Brand denylist term found in a file name (see matches above)."
+            exit 1
+          fi
+          echo "Brand gate passed: no denylist terms in content or file names."
+
+  desktop:
+    name: Desktop shell (cargo check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Tauri system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev \
+            libayatana-appindicator3-dev libxdo-dev patchelf build-essential libssl-dev
+      - run: npm ci
+      # generate_context! embeds frontendDist; the runtime serves the same dist.
+      - run: npm run build -w frontend
+      - name: Stage runtime sidecar placeholder (externalBin existence check)
+        run: |
+          set -euo pipefail
+          triple="$(rustc -vV | awk '/host:/{print $2}')"
+          printf '#!/bin/sh\necho "placeholder sidecar"\n' \
+            > "desktop/src-tauri/binaries/nexus-agent-runtime-${triple}"
+          chmod +x "desktop/src-tauri/binaries/nexus-agent-runtime-${triple}"
+      - name: cargo check
+        working-directory: desktop/src-tauri
+        run: cargo check

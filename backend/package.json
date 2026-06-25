@@ -1,0 +1,37 @@
+{
+  "name": "@nexus-agent/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Nexus Agent runtime: hexagonal agent engine with a local HTTP/SSE API.",
+  "license": "MIT",
+  "author": "open-source-zjq (https://github.com/open-source-zjq)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-source-zjq/nexus-agent.git",
+    "directory": "backend"
+  },
+  "bin": {
+    "nexus-agent": "./src/cli/serve-entry.ts",
+    "nexus-agent-cli": "./src/cli/agent-cli-entry.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch src/cli/serve-entry.ts serve --insecure",
+    "serve": "tsx src/cli/serve-entry.ts serve",
+    "start": "tsx src/cli/serve-entry.ts serve",
+    "cli": "tsx src/cli/agent-cli-entry.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

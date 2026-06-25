@@ -1,0 +1,21 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimal-authority capability for the Nexus Agent main window. The SPA is served by the loopback runtime, so IPC is granted to that remote origin (127.0.0.1 / localhost) and to the dev server. Only the permissions the web bundle actually invokes are granted; every other plugin command is reachable only from Rust and therefore needs no entry here (§10 least-authority).",
+  "windows": ["main"],
+  "remote": {
+    "urls": [
+      "http://127.0.0.1:8910",
+      "http://localhost:8910",
+      "http://localhost:5173"
+    ]
+  },
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-set-focus",
+    "core:webview:allow-internal-toggle-devtools",
+    "dialog:allow-open"
+  ]
+}

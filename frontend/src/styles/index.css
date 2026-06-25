@@ -1,0 +1,56 @@
+/*
+ * App glue. The visual language comes entirely from the recovered production
+ * stylesheet (nexus-ds.css) + nexus-supplement.css, both imported ahead of
+ * this file in main.tsx. This file only does what a Tauri/WKWebView host frame
+ * would otherwise provide: full-bleed sizing and a couple of app affordances.
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+/* The production body sets `user-select:none` for a native feel. Re-enable
+ * selection inside conversational content so users can copy answers/code. */
+.ds-markdown,
+.ds-chat-answer,
+.ds-user-message-bubble,
+.ds-code-block,
+.ds-code-block-html,
+pre,
+code,
+textarea,
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Slim scrollbars matching the design tokens (the recovered CSS ships the
+ * thumb tokens but not the WebKit scrollbar chrome the native host drew). */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--ds-scrollbar-thumb);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ds-scrollbar-thumb-hover);
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}

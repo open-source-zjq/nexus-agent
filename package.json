@@ -1,0 +1,45 @@
+{
+  "name": "nexus-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nexus Agent — a GUI-native AI coding agent: hexagonal local runtime + rich React frontend, driven by generic OpenAI/Anthropic-compatible APIs.",
+  "license": "MIT",
+  "author": "open-source-zjq (https://github.com/open-source-zjq)",
+  "homepage": "https://github.com/open-source-zjq/nexus-agent#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-source-zjq/nexus-agent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/open-source-zjq/nexus-agent/issues"
+  },
+  "keywords": [
+    "ai-agent",
+    "coding-agent",
+    "llm",
+    "openai",
+    "anthropic",
+    "tauri",
+    "react",
+    "typescript"
+  ],
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,magenta \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "npm run build -w frontend && npm run build -w backend",
+    "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend",
+    "serve": "npm run build -w frontend && npm run serve -w backend"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.3",
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

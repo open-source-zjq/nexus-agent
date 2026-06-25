@@ -1,0 +1,158 @@
+/*
+ * Supplement to the recovered production stylesheet (nexus-ds.css).
+ *
+ * The recovered CSS is the real Nexus 0.7.11 production stylesheet (Tailwind
+ * preflight + base + utilities + the .ds-* design system). It JIT-compiled only
+ * the utility classes the original code paths used. The reconstructed DOM
+ * fragments reference a handful of opacity/state/dark variants of the custom
+ * theme colours (ds-*, accent, amber) that never made it into that bundle.
+ *
+ * These 37 rules close that gap, derived from the design tokens so they track
+ * light/dark automatically (color-mix over the CSS variables). Loaded AFTER
+ * nexus-ds.css. Selectors use Tailwind's CSS escaping (\/ for the opacity
+ * modifier) so the verbatim fragment classNames resolve.
+ */
+
+/* --- background: accent ------------------------------------------------ */
+.bg-accent-soft\/60 { background-color: color-mix(in srgb, var(--ds-accent-soft) 60%, transparent); }
+.bg-accent\/10 { background-color: color-mix(in srgb, var(--ds-accent) 10%, transparent); }
+.bg-accent\/8  { background-color: color-mix(in srgb, var(--ds-accent) 8%, transparent); }
+
+/* --- background: amber (warm-accent) ----------------------------------- */
+.bg-amber-400\/15 { background-color: rgb(251 191 36 / 0.15); }
+.bg-amber-500\/12 { background-color: rgb(245 158 11 / 0.12); }
+.bg-amber-500\/16 { background-color: rgb(245 158 11 / 0.16); }
+
+/* --- background: ds surfaces ------------------------------------------- */
+.bg-ds-border-strong { background-color: var(--ds-border-strong); }
+.bg-ds-surface-subtle { background-color: var(--ds-surface-subtle); }
+.bg-ds-surface-subtle\/55 { background-color: color-mix(in srgb, var(--ds-surface-subtle) 55%, transparent); }
+.bg-ds-card\/70 { background-color: color-mix(in srgb, var(--ds-surface-card) 70%, transparent); }
+.bg-ds-card\/72 { background-color: color-mix(in srgb, var(--ds-surface-card) 72%, transparent); }
+.bg-ds-card\/95 { background-color: color-mix(in srgb, var(--ds-surface-card) 95%, transparent); }
+.bg-ds-main\/45 { background-color: color-mix(in srgb, var(--ds-bg-main) 45%, transparent); }
+.bg-ds-main\/50 { background-color: color-mix(in srgb, var(--ds-bg-main) 50%, transparent); }
+.bg-ds-main\/70 { background-color: color-mix(in srgb, var(--ds-bg-main) 70%, transparent); }
+
+/* --- background: white ------------------------------------------------- */
+.bg-white\/92 { background-color: rgb(255 255 255 / 0.92); }
+.bg-white\/94 { background-color: rgb(255 255 255 / 0.94); }
+
+/* --- borders ----------------------------------------------------------- */
+.border-accent\/18 { border-color: color-mix(in srgb, var(--ds-accent) 18%, transparent); }
+.border-accent\/60 { border-color: color-mix(in srgb, var(--ds-accent) 60%, transparent); }
+.border-ds-border-muted\/35 { border-color: color-mix(in srgb, var(--ds-border-muted) 35%, transparent); }
+.border-ds-border-muted\/70 { border-color: color-mix(in srgb, var(--ds-border-muted) 70%, transparent); }
+
+/* --- divide (child border colour) ------------------------------------- */
+.divide-ds-border-muted\/60 > :not([hidden]) ~ :not([hidden]) {
+  border-color: color-mix(in srgb, var(--ds-border-muted) 60%, transparent);
+}
+
+/* --- text -------------------------------------------------------------- */
+.text-accent\/80 { color: color-mix(in srgb, var(--ds-accent) 80%, transparent); }
+.text-ds-faint\/70 { color: color-mix(in srgb, var(--ds-text-faint) 70%, transparent); }
+
+/* --- focus / focus-within --------------------------------------------- */
+.focus-within\:border-ds-border-strong:focus-within { border-color: var(--ds-border-strong); }
+.focus\:border-accent\/40:focus { border-color: color-mix(in srgb, var(--ds-accent) 40%, transparent); }
+.focus\:ring-accent\/25:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-accent) 25%, transparent); }
+.focus\:ring-accent\/30:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-accent) 30%, transparent); }
+.ring-accent\/30 { box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-accent) 30%, transparent); }
+
+/* --- hover ------------------------------------------------------------- */
+.hover\:bg-ds-hover\/35:hover { background-color: color-mix(in srgb, var(--ds-surface-hover) 35%, transparent); }
+.hover\:bg-ds-hover\/70:hover { background-color: color-mix(in srgb, var(--ds-surface-hover) 70%, transparent); }
+.hover\:bg-ds-hover\/80:hover { background-color: color-mix(in srgb, var(--ds-surface-hover) 80%, transparent); }
+.hover\:border-accent\/30:hover { border-color: color-mix(in srgb, var(--ds-accent) 30%, transparent); }
+.hover\:border-ds-border-strong:hover { border-color: var(--ds-border-strong); }
+
+/* --- dark-only white washes ------------------------------------------- */
+.dark\:bg-white\/6:where([data-theme=dark], [data-theme=dark] *) { background-color: rgb(255 255 255 / 0.06); }
+.dark\:bg-white\/8:where([data-theme=dark], [data-theme=dark] *) { background-color: rgb(255 255 255 / 0.08); }
+
+/* --- change inspector diff viewer ------------------------------------- */
+/* The original bundle JIT-compiled only the text-color diff variants, so the
+   DiffViewer's row backgrounds are supplied here (tracking the design tokens). */
+.bg-ds-diff-added-soft { background-color: var(--ds-diff-added-soft); }
+.bg-ds-diff-removed-soft { background-color: var(--ds-diff-removed-soft); }
+
+/* --- layout/spacing utilities missing from the recovered JIT bundle ----- */
+/* The frozen nexus-ds.css only compiled the spacing/position utilities the
+   ORIGINAL code used; ported/edited views reference a few more. Missing
+   padding/inset classes are what caused visible misalignment — e.g. a search
+   box's `pl-8` was a no-op, so its absolutely-positioned magnifier (`left-2.5`)
+   overlapped the placeholder text. Values are the Tailwind v3 defaults. */
+.pl-5 { padding-left: 1.25rem; }
+.pl-8 { padding-left: 2rem; }
+.pr-3 { padding-right: 0.75rem; }
+.mb-5 { margin-bottom: 1.25rem; }
+.mr-1 { margin-right: 0.25rem; }
+.my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+.gap-7 { gap: 1.75rem; }
+.left-2\.5 { left: 0.625rem; }
+.left-3 { left: 0.75rem; }
+.top-8 { top: 2rem; }
+.-bottom-1 { bottom: -0.25rem; }
+.inset-x-0 { left: 0; right: 0; }
+.max-w-xs { max-width: 20rem; }
+.max-w-lg { max-width: 32rem; }
+.max-w-xl { max-width: 36rem; }
+.max-h-60 { max-height: 15rem; }
+.space-y-0\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.125rem; }
+
+/* --- syntax highlighting: dark-mode token colors ----------------------- */
+/* main.tsx imports highlight.js's LIGHT github theme, whose dark-on-light token
+   colours are unreadable on the dark code-block background. These overrides use
+   the GitHub Dark palette, scoped to [data-theme=dark] so they beat the unscoped
+   github.css by specificity (light mode is untouched). Only foreground colours
+   are set — the code block's background comes from the app's own styling. */
+[data-theme="dark"] .hljs { color: #c9d1d9; }
+[data-theme="dark"] .hljs-doctag,
+[data-theme="dark"] .hljs-keyword,
+[data-theme="dark"] .hljs-meta .hljs-keyword,
+[data-theme="dark"] .hljs-template-tag,
+[data-theme="dark"] .hljs-template-variable,
+[data-theme="dark"] .hljs-type,
+[data-theme="dark"] .hljs-variable.language_ { color: #ff7b72; }
+[data-theme="dark"] .hljs-title,
+[data-theme="dark"] .hljs-title.class_,
+[data-theme="dark"] .hljs-title.class_.inherited__,
+[data-theme="dark"] .hljs-title.function_ { color: #d2a8ff; }
+[data-theme="dark"] .hljs-attr,
+[data-theme="dark"] .hljs-attribute,
+[data-theme="dark"] .hljs-literal,
+[data-theme="dark"] .hljs-meta,
+[data-theme="dark"] .hljs-number,
+[data-theme="dark"] .hljs-operator,
+[data-theme="dark"] .hljs-variable,
+[data-theme="dark"] .hljs-selector-attr,
+[data-theme="dark"] .hljs-selector-class,
+[data-theme="dark"] .hljs-selector-id { color: #79c0ff; }
+[data-theme="dark"] .hljs-regexp,
+[data-theme="dark"] .hljs-string,
+[data-theme="dark"] .hljs-meta .hljs-string { color: #a5d6ff; }
+[data-theme="dark"] .hljs-built_in,
+[data-theme="dark"] .hljs-symbol { color: #ffa657; }
+[data-theme="dark"] .hljs-comment,
+[data-theme="dark"] .hljs-code,
+[data-theme="dark"] .hljs-formula { color: #8b949e; }
+[data-theme="dark"] .hljs-name,
+[data-theme="dark"] .hljs-quote,
+[data-theme="dark"] .hljs-selector-tag,
+[data-theme="dark"] .hljs-selector-pseudo { color: #7ee787; }
+[data-theme="dark"] .hljs-subst { color: #c9d1d9; }
+[data-theme="dark"] .hljs-section { color: #1f6feb; font-weight: bold; }
+[data-theme="dark"] .hljs-bullet { color: #f2cc60; }
+[data-theme="dark"] .hljs-emphasis { color: #c9d1d9; }
+[data-theme="dark"] .hljs-strong { color: #c9d1d9; }
+[data-theme="dark"] .hljs-addition { color: #aff5b4; background-color: #033a16; }
+[data-theme="dark"] .hljs-deletion { color: #ffdcd7; background-color: #67060c; }
+
+/* The Nexus brand mark shipped with a continuous rotation (the
+ * `ds-nexus-logo-reference-spin` keyframes). A perpetually spinning logo is
+ * distracting, so freeze it — the mark stays at its resting orientation.
+ * (Reduced-motion users already had it disabled.) */
+.ds-work-logo.is-active .ds-nexus-logo-spin-shell {
+  animation: none !important;
+}

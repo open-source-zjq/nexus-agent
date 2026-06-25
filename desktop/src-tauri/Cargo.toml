@@ -1,0 +1,41 @@
+[package]
+name = "nexus-agent-desktop"
+version = "0.1.0"
+description = "Nexus Agent — native desktop shell (Tauri 2.x). Hosts the same SPA as the browser build and spawns the local runtime as a sidecar."
+authors = ["Nexus Agent"]
+edition = "2021"
+rust-version = "1.77"
+
+# The desktop shell is a thin host: it spawns the backend runtime sidecar,
+# performs the NEXUS_READY handshake, then points the WebView at the
+# runtime-served SPA. All product identifiers are Nexus-owned (§7).
+[lib]
+name = "nexus_agent_desktop_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "macos-private-api"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-http = "2"
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
+tauri-plugin-deep-link = "2"
+tauri-plugin-autostart = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+
+# macOS-only window vibrancy (frosted-glass effect). Cosmetic; gated so the
+# crate is never pulled into non-macOS builds.
+[target.'cfg(target_os = "macos")'.dependencies]
+window-vibrancy = "0.5"
+
+[features]
+# This feature is used for production builds where `devUrl` is unused.
+custom-protocol = ["tauri/custom-protocol"]
