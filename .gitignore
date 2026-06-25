@@ -18,8 +18,3 @@ desktop/src-tauri/binaries/nexus-agent-runtime*
 .claude/
 .idea/
 .vscode/
-
-# The brand denylist lives OUT of the repo (so the reproduced product's own
-# brand/codename/logo-mark strings are never published here). CI materializes it
-# from the BRAND_DENYLIST secret; it is excluded from the scan itself (§11).
-.brand-denylist
