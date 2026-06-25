@@ -1011,6 +1011,11 @@ function loadConfigFromPath(path: string, dataDir: string): NexusConfig {
 function applyEnvApiKeys(config: NexusConfig): NexusConfig {
   const providers = { ...config.providers };
   const envFor: Record<string, string | undefined> = {
+    deepseek: process.env.DEEPSEEK_API_KEY,
+    qwen: process.env.QWEN_API_KEY,
+    glm: process.env.ZHIPUAI_API_KEY,
+    minimax: process.env.MINIMAX_API_KEY,
+    // Kept so users who add OpenAI/Anthropic from Settings can still inject keys via env.
     openai: process.env.OPENAI_API_KEY,
     anthropic: process.env.ANTHROPIC_API_KEY,
   };

@@ -680,6 +680,22 @@ export function SettingsView(): JSX.Element {
   const ghostBtn =
     "shrink-0 rounded-xl border border-ds-border bg-ds-card px-3 py-2 text-[13px] font-medium text-ds-ink shadow-sm transition hover:bg-ds-hover";
 
+  // Only surface providers the user has actually configured: a key present at
+  // load, a provider being added this session (draft), or one keyed during this
+  // edit. Seeded-but-unconfigured presets (the domestic providers the user did
+  // not pick during onboarding) stay in config — so the setup wizard can still
+  // offer them — but must not clutter Settings as empty cards.
+  const configuredAtLoad = new Set(
+    Object.entries(config?.providers ?? {})
+      .filter(([, p]) => (p?.apiKey ?? "").trim() !== "")
+      .map(([n]) => n),
+  );
+  const isProviderVisible = (name: string, provider?: ProviderConfig): boolean =>
+    configuredAtLoad.has(name) || draftProviders.has(name) || (provider?.apiKey ?? "").trim() !== "";
+  const visibleProviderEntries = Object.entries(draft.providers).filter(([name, provider]) =>
+    isProviderVisible(name, provider),
+  );
+
   return (
     <div className="ds-no-drag flex h-full min-h-0 w-full min-w-0 bg-ds-main">
 
@@ -940,7 +956,12 @@ export function SettingsView(): JSX.Element {
               </div>
             </div>
             <div className="divide-y divide-ds-border-muted px-2 py-1">
-              {Object.entries(draft.providers).map(([name, provider], index) => {
+              {visibleProviderEntries.length === 0 && (
+                <div className="px-3 py-6 text-center text-[13px] text-ds-muted">
+                  No providers configured yet — add one above, or run the setup wizard from General.
+                </div>
+              )}
+              {visibleProviderEntries.map(([name, provider], index) => {
                 const isDraft = draftProviders.has(name);
                 const isDefaultProvider = index === 0;
                 const idLocked = isDefaultProvider;
@@ -1271,9 +1292,11 @@ export function SettingsView(): JSX.Element {
                 </div>
                 <div className="flex w-full min-w-0 justify-end sm:max-w-[420px]">
                   <select className={`ds-select ${rowControl}`} value={draft.defaultModel ?? ""} onChange={(e) => setDraft({ ...draft, defaultModel: e.target.value })}>
-                    {draft.models.map((m) => (
-                      <option key={m.id} value={m.id}>{m.label ?? m.id}</option>
-                    ))}
+                    {draft.models
+                      .filter((m) => draft.providers[m.provider] && isProviderVisible(m.provider, draft.providers[m.provider]))
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>{m.label ?? m.id}</option>
+                      ))}
                   </select>
                 </div>
               </div>

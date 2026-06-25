@@ -500,7 +500,11 @@ function ModelPicker(): JSX.Element {
   const runtimeInfo = useStore((s) => s.runtimeInfo);
   const composerModel = useStore((s) => s.composerModel);
   const setComposerModel = useStore((s) => s.setComposerModel);
-  const models = runtimeInfo?.models ?? [];
+  // Only list models whose provider has a key (same rule as Settings: a masked
+  // key counts as configured, a blank one does not). Seeded-but-unconfigured
+  // presets (qwen/glm/minimax before the user picks them) stay out of the picker
+  // instead of showing as disabled "no API key" rows.
+  const models = (runtimeInfo?.models ?? []).filter((m) => m.configured);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

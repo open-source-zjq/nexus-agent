@@ -583,49 +583,87 @@ export function defaultEndpointFormat(kind: ProviderKind): ModelEndpointFormat {
 export function seedConfig(): NexusConfig {
   return NexusConfigSchema.parse({
     serve: {},
-    // Lean default: just the two canonical OpenAI- and Anthropic-shaped
-    // endpoints. Add more providers (DeepSeek, Qwen, GLM, any
-    // OpenAI/Anthropic-compatible gateway) from Settings → Providers.
+    // GUI-native default: ship the four first-class domestic providers
+    // (DeepSeek / Qwen / GLM / MiniMax) as OpenAI-compatible endpoints with
+    // blank keys — the first-run wizard collects a key. The provider keys are
+    // deliberately named `deepseek`/`glm`/etc. so the reasoning-protocol
+    // inference (inferRequestProtocol) picks deepseek-chat-completions /
+    // glm-thinking automatically. OpenAI/Anthropic are intentionally NOT
+    // seeded; add them — or any private/compatible gateway with a custom base
+    // URL — from Settings → Providers.
     providers: {
-      openai: { kind: "openai", apiKey: "", baseUrl: DEFAULT_BASE_URLS.openai, endpointFormat: "chat_completions" },
-      anthropic: { kind: "anthropic", apiKey: "", baseUrl: DEFAULT_BASE_URLS.anthropic, endpointFormat: "messages" },
+      deepseek: { kind: "openai", apiKey: "", baseUrl: "https://api.deepseek.com", endpointFormat: "chat_completions" },
+      qwen: { kind: "openai", apiKey: "", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", endpointFormat: "chat_completions" },
+      glm: { kind: "openai", apiKey: "", baseUrl: "https://open.bigmodel.cn/api/paas/v4", endpointFormat: "chat_completions" },
+      minimax: { kind: "openai", apiKey: "", baseUrl: "https://api.minimax.io/v1", endpointFormat: "chat_completions" },
     },
     models: [
+      // DeepSeek V4 — dual-mode (Thinking / Non-Thinking), 1M context. The
+      // `deepseek` provider key routes these onto deepseek-chat-completions
+      // with thinking defaulted on (off/high/max) by resolveReasoningProfile.
       {
-        id: "gpt-4o",
-        label: "GPT-4o",
-        provider: "openai",
-        contextWindowTokens: 128000,
-        supportsImages: true,
-        pricing: { inputPerMTokUsd: 2.5, outputPerMTokUsd: 10, cachedInputPerMTokUsd: 1.25 },
+        id: "deepseek-v4-flash",
+        label: "DeepSeek V4 Flash",
+        provider: "deepseek",
+        contextWindowTokens: 1000000,
+        largeWindow: true,
       },
       {
-        id: "gpt-4o-mini",
-        label: "GPT-4o mini",
-        provider: "openai",
-        contextWindowTokens: 128000,
-        supportsImages: true,
-        pricing: { inputPerMTokUsd: 0.15, outputPerMTokUsd: 0.6 },
+        id: "deepseek-v4-pro",
+        label: "DeepSeek V4 Pro",
+        provider: "deepseek",
+        contextWindowTokens: 1000000,
+        largeWindow: true,
+      },
+      // Qwen 3.x via DashScope OpenAI-compatible mode (treated as plain
+      // openai-chat — no special reasoning protocol).
+      {
+        id: "qwen3.7-max",
+        label: "Qwen3.7 Max",
+        provider: "qwen",
+        contextWindowTokens: 131072,
       },
       {
-        id: "claude-3-5-sonnet-latest",
-        label: "Claude 3.5 Sonnet",
-        provider: "anthropic",
+        id: "qwen3.5-plus",
+        label: "Qwen3.5 Plus",
+        provider: "qwen",
+        contextWindowTokens: 131072,
+      },
+      // GLM 5.x — reasoning-capable. Non-DeepSeek reasoners only enable thinking
+      // when the model advertises a reasoning profile, so both carry one; the
+      // `glm` provider key selects the glm-thinking wire protocol.
+      {
+        id: "glm-5.2",
+        label: "GLM-5.2",
+        provider: "glm",
+        contextWindowTokens: 1000000,
+        largeWindow: true,
+        reasoning: { supportedEfforts: ["off", "high"], defaultEffort: "high" },
+      },
+      {
+        id: "glm-5.1",
+        label: "GLM-5.1",
+        provider: "glm",
         contextWindowTokens: 200000,
-        supportsImages: true,
-        maxOutputTokens: 8192,
-        pricing: { inputPerMTokUsd: 3, outputPerMTokUsd: 15, cachedInputPerMTokUsd: 0.3 },
+        reasoning: { supportedEfforts: ["off", "high"], defaultEffort: "high" },
+      },
+      // MiniMax via the official OpenAI-compatible endpoint (plain openai-chat;
+      // M3's thinking is not given a dedicated protocol).
+      {
+        id: "MiniMax-M3",
+        label: "MiniMax M3",
+        provider: "minimax",
+        contextWindowTokens: 1000000,
+        largeWindow: true,
       },
       {
-        id: "claude-3-5-haiku-latest",
-        label: "Claude 3.5 Haiku",
-        provider: "anthropic",
-        contextWindowTokens: 200000,
-        maxOutputTokens: 8192,
-        pricing: { inputPerMTokUsd: 0.8, outputPerMTokUsd: 4 },
+        id: "MiniMax-M2.7",
+        label: "MiniMax M2.7",
+        provider: "minimax",
+        contextWindowTokens: 204800,
       },
     ],
-    defaultModel: "gpt-4o",
+    defaultModel: "deepseek-v4-flash",
   });
 }
 
